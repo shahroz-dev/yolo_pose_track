@@ -1,7 +1,10 @@
+import os
+
 from scripts.sort import *
 import cv2
 import scripts.poseEstimation as poseEstimator
 import tensorflow as tf
+
 model = tf.keras.models.load_model("models/gait_model.h5")
 import csv
 
@@ -38,8 +41,18 @@ class Annotator(object):
 
 
 def main():
-    annotator = Annotator('Data/drunk/Drunk1_frame_0045.jpg', 'drunk')
-    annotator.get_annotated_frame()
+    label = "drunk"
+    for filenames in os.listdir("Data/drunk"):
+        path = "Data/drunk/" + filenames
+        print(path)
+        annotator = Annotator(path, label)
+        annotator.get_annotated_frame()
+    label = "sober"
+    for filenames in os.listdir("Data/sober"):
+        path = "Data/sober/" + filenames
+        print(path)
+        annotator = Annotator(path, label)
+        annotator.get_annotated_frame()
 
 
 if __name__ == "__main__":

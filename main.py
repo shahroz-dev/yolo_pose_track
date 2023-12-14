@@ -5,7 +5,8 @@ import scripts.poseEstimation as poseEstimator
 import scripts.FaceMeshModule as fm
 import numpy as np
 import tensorflow as tf
-model = tf.keras.models.load_model("models/gait_model.h5")
+
+model = tf.keras.models.load_model("models/gait_binary_model.tflite")
 from collections import deque
 import csv
 
@@ -17,6 +18,7 @@ class Camera(object):
 
     def __init__(self):
         self.video = cv2.VideoCapture('videos/ch09_20231111000000.mp4')
+        # self.video = cv2.VideoCapture(0)
         self.video.set(3, Camera.frame_width)
         self.video.set(4, Camera.frame_height)
         self.poseEst = poseEstimator.PoseEstimator()
@@ -33,6 +35,12 @@ class Camera(object):
                 # Person Detector and Tracker with Pose Landmark
                 tracked_lm_list = self.poseEst.findPose(inFrame=frame)
                 for lm in range(len(tracked_lm_list)):
+                    landmarks_np = np.array([[tracked_lm_list[lm]["lm"+str(i)+"_x"], tracked_lm_list[lm]["lm"+str(i)+"_y"]]
+                                             for i in range(1, 17)]).reshape(1, -1)
+                    prediction = model.predict(landmarks_np)[0]
+                    state = "Drunk" if prediction[0] > 0.5 else "Sober"
+                    cvzone.putTextRect(frame, state,
+                                       (tracked_lm_list[lm]["Bbox_x2"], tracked_lm_list[lm]["Bbox_y1"]), scale=2)
                     self.write_landmarks_to_csv(tracked_lm_list[lm], 'rolling_data.csv')
 
                 # Depth Estimator

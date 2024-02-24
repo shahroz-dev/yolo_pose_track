@@ -1,0 +1,9 @@
+scikit-image
+ultralytics
+cvzone
+openpyxl
+opencv-python
+pandas
+numpy
+matplotlib
+mediapipe
